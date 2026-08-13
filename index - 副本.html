@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>贪吃蛇大作战</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui; touch-action:none;}
+body{
+    background: linear-gradient(135deg,#0f172a,#1e293b);
+    color:#fff;
+    min-height:100vh;
+}
+
+.top-bar{
+    position:fixed;
+    top:16px;
+    right:16px;
+    display:flex;
+    gap:10px;
+    z-index:99;
+}
+.user-avatar{
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    background:#6366f1;
+    border:none;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+    display:none;
+}
+.user-menu{
+    display:none;
+    position:absolute;
+    top:52px;
+    right:0;
+    background:#1e293b;
+    border-radius:8px;
+    padding:12px;
+    min-width:160px;
+    box-shadow:0 2px 12px #0006;
+}
+.user-menu p{
+    padding:6px 0;
+    margin-bottom:8px;
+    border-bottom:1px solid #444;
+}
+
+.btn{
+    width:220px;
+    padding:14px;
+    font-size:18px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+.btn-sm{
+    width:auto;
+    padding:8px 14px;
+}
+.btn-green{background:#22c55e;color:#fff;}
+.btn-blue{background:#2563eb;color:#fff;}
+.btn-gray{background:#475569;color:#fff;}
+
+.home-page{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    height:100vh;
+    gap:30px;
+}
+.home-title{
+    font-size:42px;
+    font-weight:bold;
+}
+.home-btn-group{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+
+.game-page{
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    padding-top:20px;
+}
+#game{border:2px solid #94a3b8;border-radius:6px;background:#020617}
+.info-bar{
+    width:640px;
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:8px;
+    font-size:18px;
+}
+
+.record-page{
+    display:none;
+    width:100%;
+    padding:40px;
+}
+.record-page h2{text-align:center;margin-bottom:20px;}
+.record-item{
+    background:#1e293b;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:8px;
+}
+.back-btn{margin:20px auto;display:block;}
+
+.modal-box{
+    display:none;
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    background:rgba(0,0,0,0.75);
+    align-items:center;
+    justify-content:center;
+    z-index:999;
+}
+.modal-content{
+    background:#1e293b;
+    padding:30px;
+    border-radius:12px;
+    min-width:320px;
+}
+.modal-content h3{margin-bottom:20px;text-align:center;}
+.input-item{
+    margin-bottom:14px;
+}
+.input-item label{display:block;margin-bottom:6px;}
+.input-item input{
+    width:100%;
+    padding:10px;
+    border-radius:6px;
+    border:none;
+    font-size:16px;
+}
+.modal-btn-row{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+}
+
+.gameover-modal{
+    display:none;
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.75);
+    align-items:center;justify-content:center;
+    z-index:999;
+}
+.gameover-content{
+    background:#1e293b;padding:30px;border-radius:12px;text-align:center;
+}
+
+.mobile-ctrl{
+    display:none;
+    margin-top:16px;
+}
+@media (max-width:700px){
+    .mobile-ctrl{display:grid;}
+    .info-bar{width:90vw;}
+    #game{width:90vw;height:90vw;}
+}
+.mobile-ctrl button{
+    width:70px;height:70px;
+    font-size:24px;
+    border-radius:50%;
+    border:none;
+    background:#334155;
+    color:white;
+    margin:4px;
+}
+.dir-grid{
+    display:grid;
+    grid-template-columns:repeat(3,78px);
+    grid-template-rows:repeat(3,78px);
+    place-items:center;
+}
+</style>
+</head>
+<body>
+
+<div class="home-page" id="homePage">
+    <div class="top-bar" id="topBar">
+        <div id="loginGroup">
+            <button class="btn btn-blue btn-sm" id="loginBtn">登录</button>
+            <button class="btn btn-gray btn-sm" id="registerBtn">注册</button>
+        </div>
+        <button class="user-avatar" id="avatarBtn">U</button>
+        <div class="user-menu" id="userMenu">
+            <p>用户名：<span id="showUsername"></span></p>
+            <button class="btn btn-gray btn-sm" id="logoutBtn">退出登录</button>
+        </div>
+    </div>
+    <div class="home-title">贪吃蛇大作战</div>
+    <div class="home-btn-group">
+        <button class="btn btn-green" id="startGameBtn">开始游戏</button>
+        <button class="btn btn-blue" id="recordBtn">历史记录</button>
+    </div>
+</div>
+
+<div class="game-page" id="gamePage">
+    <div class="info-bar">
+        <div>分数：<span id="score">0</span></div>
+        <div>我的长度：<span id="lenText">1</span></div>
+    </div>
+    <canvas id="game" width="640" height="640"></canvas>
+    <div class="mobile-ctrl">
+        <div class="dir-grid">
+            <div></div>
+            <button data-dir="up">↑</button>
+            <div></div>
+            <button data-dir="left">←</button>
+            <div></div>
+            <button data-dir="right">→</button>
+            <div></div>
+            <button data-dir="down">↓</button>
+            <div></div>
+        </div>
+    </div>
+</div>
+
+<div class="record-page" id="recordPage">
+    <h2>对局历史记录</h2>
+    <div id="recordList"></div>
+    <button class="btn btn-gray back-btn" id="backHomeFromRecord">返回首页</button>
+</div>
+
+<div class="modal-box" id="loginModal">
+    <div class="modal-content">
+        <h3>用户登录</h3>
+        <div class="input-item">
+            <label>用户名</label>
+            <input type="text" id="loginUser">
+        </div>
+        <div class="input-item">
+            <label>密码</label>
+            <input type="password" id="loginPwd">
+        </div>
+        <div class="modal-btn-row">
+            <button class="btn btn-green" id="confirmLogin">登录</button>
+            <button class="btn btn-gray" id="closeLogin">取消</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-box" id="regModal">
+    <div class="modal-content">
+        <h3>用户注册</h3>
+        <div class="input-item">
+            <label>用户名</label>
+            <input type="text" id="regUser">
+        </div>
+        <div class="input-item">
+            <label>密码</label>
+            <input type="password" id="regPwd">
+        </div>
+        <div class="modal-btn-row">
+            <button class="btn btn-green" id="confirmReg">确定注册</button>
+            <button class="btn btn-gray" id="closeReg">取消</button>
+        </div>
+    </div>
+</div>
+
+<div class="gameover-modal" id="gameOverModal">
+    <div class="gameover-content">
+        <h2>游戏结束</h2>
+        <p id="finalInfo"></p>
+        <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;">
+            <button class="btn btn-green" id="restartBtn">再来一局</button>
+            <button class="btn btn-gray" id="backHomeBtn">返回首页</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const StorageUtil = {
+    getUsers(){
+        let str = localStorage.getItem("snake_users");
+        return str ? JSON.parse(str) : {};
+    },
+    saveUser(username,pwd){
+        let users = this.getUsers();
+        users[username] = {pwd,records:[]};
+        localStorage.setItem("snake_users",JSON.stringify(users));
+    },
+    getUser(username){
+        let users = this.getUsers();
+        return users[username];
+    },
+    saveRecord(username,score,length){
+        let users = this.getUsers();
+        if(!users[username]) return;
+        users[username].records.push({
+            time:new Date().toLocaleString(),
+            score,
+            length
+        });
+        localStorage.setItem("snake_users",JSON.stringify(users));
+    }
+}
+
+let loginUser = null;
+
+const homePage = document.getElementById("homePage");
+const gamePage = document.getElementById("gamePage");
+const recordPage = document.getElementById("recordPage");
+const loginModal = document.getElementById("loginModal");
+const regModal = document.getElementById("regModal");
+const gameOverModal = document.getElementById("gameOverModal");
+const recordList = document.getElementById("recordList");
+
+const loginGroup = document.getElementById("loginGroup");
+const avatarBtn = document.getElementById("avatarBtn");
+const userMenu = document.getElementById("userMenu");
+const showUsername = document.getElementById("showUsername");
+const logoutBtn = document.getElementById("logoutBtn");
+
+function refreshTopBar(){
+    if(loginUser){
+        loginGroup.style.display = "none";
+        avatarBtn.style.display = "block";
+        avatarBtn.textContent = loginUser[0].toUpperCase();
+        showUsername.innerText = loginUser;
+    }else{
+        loginGroup.style.display = "flex";
+        avatarBtn.style.display = "none";
+        userMenu.style.display = "none";
+    }
+}
+
+avatarBtn.onclick = function(){
+    userMenu.style.display = userMenu.style.display === "block" ? "none" : "block";
+}
+logoutBtn.onclick = function(){
+    loginUser = null;
+    refreshTopBar();
+}
+
+function showPage(page){
+    homePage.style.display = "none";
+    gamePage.style.display = "none";
+    recordPage.style.display = "none";
+    if(page === "home") homePage.style.display = "flex";
+    if(page === "game") {
+        gamePage.style.display = "flex";
+        resetGame();
+    }
+    if(page === "record") recordPage.style.display = "block";
+}
+
+document.getElementById("loginBtn").onclick = ()=>{
+    loginModal.style.display = "flex";
+}
+document.getElementById("closeLogin").onclick = ()=>{
+    loginModal.style.display = "none";
+}
+document.getElementById("registerBtn").onclick = ()=>{
+    regModal.style.display = "flex";
+}
+document.getElementById("closeReg").onclick = ()=>{
+    regModal.style.display = "none";
+}
+
+document.getElementById("confirmReg").onclick = ()=>{
+    let u = document.getElementById("regUser").value.trim();
+    let p = document.getElementById("regPwd").value.trim();
+    if(!u || !p){
+        alert("用户名和密码不能为空！");
+        return;
+    }
+    if(StorageUtil.getUser(u)){
+        alert("用户名已存在！");
+        return;
+    }
+    StorageUtil.saveUser(u,p);
+    alert("注册成功，请登录！");
+    regModal.style.display = "none";
+    document.getElementById("regUser").value = "";
+    document.getElementById("regPwd").value = "";
+}
+
+document.getElementById("confirmLogin").onclick = ()=>{
+    let u = document.getElementById("loginUser").value.trim();
+    let p = document.getElementById("loginPwd").value.trim();
+    if(!u||!p){
+        alert("用户名密码不能为空");
+        return;
+    }
+    let userInfo = StorageUtil.getUser(u);
+    if(!userInfo){
+        alert("账户不存在，请先注册！");
+        return;
+    }
+    if(userInfo.pwd !== p){
+        alert("密码错误");
+        return;
+    }
+    loginUser = u;
+    refreshTopBar();
+    alert("登录成功！");
+    loginModal.style.display = "none";
+    document.getElementById("loginUser").value = "";
+}
+
+document.getElementById("startGameBtn").onclick = ()=>{
+    if(!loginUser){
+        alert("请先登录账号！");
+        return;
+    }
+    showPage("game");
+}
+
+document.getElementById("recordBtn").onclick = ()=>{
+    if(!loginUser){
+        alert("请先登录账号！");
+        return;
+    }
+    let userData = StorageUtil.getUser(loginUser);
+    recordList.innerHTML = "";
+    if(userData.records.length === 0){
+        recordList.innerHTML = "<p style='text-align:center'>暂无对局记录</p>";
+    }else{
+        userData.records.forEach(item=>{
+            let div = document.createElement("div");
+            div.className = "record-item";
+            div.innerHTML = `时间：${item.time} &nbsp;&nbsp;分数：${item.score} &nbsp;&nbsp;长度：${item.length}`;
+            recordList.appendChild(div);
+        })
+    }
+    showPage("record");
+}
+document.getElementById("backHomeFromRecord").onclick = ()=>{
+    showPage("home");
+}
+
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const scoreDom = document.getElementById('score');
+const lenDom = document.getElementById('lenText');
+const finalInfo = document.getElementById("finalInfo");
+
+const size = 20;
+const grid = canvas.width / size;
+const speedDelay = 160;
+
+let playerSnake = [];
+let score = 0;
+let aiSnakes = [];
+let foods = [];
+let gameRunning = false;
+let holdDir = {x:0,y:0};
+
+function setDir(newDir){
+    if(!gameRunning) return;
+    holdDir = newDir;
+}
+function stopMove(){
+    holdDir = {x:0,y:0};
+}
+
+function randomAiColor(){
+    const colors = ['#3b82f6','#22c55e','#eab308','#a855f7','#06b6d4'];
+    return colors[Math.floor(Math.random()*colors.length)];
+}
+
+function createAISnake(){
+    const len = Math.floor(Math.random()*4)+3;
+    const sx = Math.floor(Math.random()*grid);
+    const sy = Math.floor(Math.random()*grid);
+    const body = [];
+    for(let i=0;i<len;i++) body.push({x:sx,y:sy});
+    return {
+        body,
+        dir:{
+            x:[1,-1,0][Math.floor(Math.random()*3)],
+            y:[1,-1,0][Math.floor(Math.random()*3)]
+        },
+        color:randomAiColor()
+    }
+}
+
+function resetGame(){
+    gameOverModal.style.display = "none";
+    gameRunning = true;
+    score = 0;
+    scoreDom.textContent = score;
+    playerSnake = [{x:10,y:10}];
+    holdDir = {x:0,y:0};
+    aiSnakes = [];
+    for(let i=0;i<5;i++) aiSnakes.push(createAISnake());
+    foods = [];
+    for(let i=0;i<12;i++) spawnFood();
+    updateLengthUI();
+}
+
+function spawnFood(){
+    foods.push({
+        x:Math.floor(Math.random()*grid),
+        y:Math.floor(Math.random()*grid)
+    })
+}
+
+function updateLengthUI(){
+    lenDom.innerText = playerSnake.length;
+}
+
+document.addEventListener('keydown',e=>{
+    if(!gameRunning) return;
+    if(e.code==='ArrowUp') setDir({x:0,y:-1});
+    if(e.code==='ArrowDown') setDir({x:0,y:1});
+    if(e.code==='ArrowLeft') setDir({x:-1,y:0});
+    if(e.code==='ArrowRight') setDir({x:1,y:0});
+})
+document.addEventListener('keyup',e=>{
+    if(e.code.startsWith("Arrow")) stopMove();
+})
+
+document.querySelectorAll("[data-dir]").forEach(btn=>{
+    btn.addEventListener("touchstart",(ev)=>{
+        ev.preventDefault();
+        let d = btn.dataset.dir;
+        if(d==="up") setDir({x:0,y:-1});
+        if(d==="down") setDir({x:0,y:1});
+        if(d==="left") setDir({x:-1,y:0});
+        if(d==="right") setDir({x:1,y:0});
+    })
+    btn.addEventListener("touchend",(ev)=>{
+        ev.preventDefault();
+        stopMove();
+    })
+})
+
+function aiTurn(ai){
+    if(Math.random()<0.2){
+        const d = [
+            {x:1,y:0},{x:-1,y:0},
+            {x:0,y:1},{x:0,y:-1}
+        ];
+        ai.dir = d[Math.floor(Math.random()*4)];
+    }
+}
+
+function aiEatFood(ai){
+    const head = ai.body[0];
+    for(let i=foods.length-1;i>=0;i--){
+        const f = foods[i];
+        if(head.x===f.x && head.y===f.y){
+            foods.splice(i,1);
+            ai.body.push({...ai.body[ai.body.length-1]});
+            spawnFood();
+        }
+    }
+}
+
+function updateAI(){
+    for(let i = aiSnakes.length -1; i >= 0; i--){
+        const ai = aiSnakes[i];
+        aiTurn(ai);
+        const head = {
+            x: ai.body[0].x + ai.dir.x,
+            y: ai.body[0].y + ai.dir.y
+        };
+        if(head.x<0||head.x>=grid||head.y<0||head.y>=grid){
+            ai.dir.x *= -1;
+            ai.dir.y *= -1;
+            continue;
+        }
+        ai.body.unshift(head);
+        aiEatFood(ai);
+        ai.body.pop();
+
+        const aiHead = ai.body[0];
+        let hitPlayer = false;
+        for(let seg of playerSnake){
+            if(aiHead.x === seg.x && aiHead.y === seg.y){
+                hitPlayer = true;
+                break;
+            }
+        }
+        if(hitPlayer){
+            const gainLen = ai.body.length;
+            score += gainLen * 20;
+            scoreDom.textContent = score;
+            const tail = playerSnake[playerSnake.length -1];
+            for(let k=0;k<gainLen;k++){
+                playerSnake.push({...tail});
+            }
+            updateLengthUI();
+            aiSnakes.splice(i,1);
+            aiSnakes.push(createAISnake());
+        }
+    }
+}
+
+function checkPlayerHitAI(){
+    const pHead = playerSnake[0];
+    for(let ai of aiSnakes){
+        for(let seg of ai.body){
+            if(pHead.x === seg.x && pHead.y === seg.y){
+                gameOver();
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function updatePlayer(){
+    if(holdDir.x === 0 && holdDir.y === 0) return;
+
+    const head = {
+        x: playerSnake[0].x + holdDir.x,
+        y: playerSnake[0].y + holdDir.y
+    };
+    if(head.x<0||head.x>=grid||head.y<0||head.y>=grid){
+        gameOver();
+        return;
+    }
+    playerSnake.unshift(head);
+
+    let eatFood = false;
+    for(let i=foods.length-1;i>=0;i--){
+        const f = foods[i];
+        if(head.x === f.x && head.y === f.y){
+            foods.splice(i,1);
+            eatFood = true;
+            score +=10;
+            scoreDom.textContent = score;
+            spawnFood();
+            break;
+        }
+    }
+    if(!eatFood){
+        playerSnake.pop();
+    }
+    updateLengthUI();
+    checkPlayerHitAI();
+}
+
+function gameOver(){
+    gameRunning = false;
+    StorageUtil.saveRecord(loginUser,score,playerSnake.length);
+    finalInfo.innerText = `最终分数：${score}，蛇长度：${playerSnake.length}`;
+    gameOverModal.style.display = "flex";
+}
+
+function drawSnake(body,color,isPlayer=false){
+    body.forEach((seg,idx)=>{
+        ctx.fillStyle = color;
+        const px = seg.x*size;
+        const py = seg.y*size;
+        const s = size;
+        ctx.fillRect(px,py,s,s);
+        if(isPlayer && idx===0){
+            ctx.fillStyle="#fff";
+            ctx.beginPath();
+            ctx.arc(px+5,py+5,2.5,0,Math.PI*2);
+            ctx.arc(px+12,py+5,2.5,0,Math.PI*2);
+            ctx.fill();
+        }
+    })
+}
+
+function render(){
+    ctx.fillStyle="#020617";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    ctx.fillStyle="#fef08a";
+    foods.forEach(f=>{
+        ctx.beginPath();
+        ctx.arc(
+            f.x*size+size/2,
+            f.y*size+size/2,
+            size/2,0,Math.PI*2
+        );
+        ctx.fill();
+    })
+    aiSnakes.forEach(ai=>drawSnake(ai.body,ai.color,false));
+    drawSnake(playerSnake,"#ef4444",true);
+}
+
+function loop(){
+    if(gameRunning){
+        updatePlayer();
+        updateAI();
+        render();
+    }
+    setTimeout(loop,speedDelay);
+}
+
+document.getElementById("restartBtn").addEventListener("click",resetGame);
+document.getElementById("backHomeBtn").addEventListener("click",function(){
+    gameOverModal.style.display = "none";
+    showPage("home");
+});
+
+refreshTopBar();
+showPage("home");
+loop();
+</script>
+</body>
+</html>
