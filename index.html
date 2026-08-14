@@ -328,7 +328,7 @@ const StorageUtil = {
     }
 }
 
-let loginUser = null;
+let loginUser = localStorage.getItem("snake_current_user") || null;
 
 const homePage = document.getElementById("homePage");
 const gamePage = document.getElementById("gamePage");
@@ -346,6 +346,13 @@ const logoutBtn = document.getElementById("logoutBtn");
 
 function refreshTopBar(){
     if(loginUser){
+        let userData = StorageUtil.getUser(loginUser);
+        if(!userData){
+            loginUser = null;
+            localStorage.removeItem("snake_current_user");
+        }
+    }
+    if(loginUser){
         loginGroup.style.display = "none";
         avatarBtn.style.display = "block";
         avatarBtn.textContent = loginUser[0].toUpperCase();
@@ -362,6 +369,7 @@ avatarBtn.onclick = function(){
 }
 logoutBtn.onclick = function(){
     loginUser = null;
+    localStorage.removeItem("snake_current_user");
     refreshTopBar();
 }
 
@@ -402,7 +410,10 @@ document.getElementById("confirmReg").onclick = ()=>{
         return;
     }
     StorageUtil.saveUser(u,p);
-    alert("注册成功，请登录！");
+    loginUser = u;
+    localStorage.setItem("snake_current_user", u);
+    refreshTopBar();
+    alert("注册成功！已自动登录。");
     regModal.style.display = "none";
     document.getElementById("regUser").value = "";
     document.getElementById("regPwd").value = "";
@@ -425,6 +436,7 @@ document.getElementById("confirmLogin").onclick = ()=>{
         return;
     }
     loginUser = u;
+    localStorage.setItem("snake_current_user", u);
     refreshTopBar();
     alert("登录成功！");
     loginModal.style.display = "none";
