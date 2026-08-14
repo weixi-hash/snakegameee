@@ -39,9 +39,6 @@ jobs:
             platforms;android-34
             build-tools;34.0.0
 
-      - name: Install Capacitor
-        run: npm install -g @capacitor/cli@6.0.0
-
       - name: Prepare web assets
         run: |
           mkdir -p www
@@ -49,11 +46,17 @@ jobs:
           cp manifest.json www/
           cp sw.js www/
 
+      - name: Init npm project
+        run: npm init -y
+
+      - name: Install Capacitor
+        run: npm install @capacitor/core@6.0.0 @capacitor/cli@6.0.0 @capacitor/android@6.0.0
+
       - name: Init Capacitor
         run: npx cap init "Snake Game" "com.snakegame.app" --web-dir "www"
 
       - name: Add Android platform
-        run: npx cap add android@6.0.0
+        run: npx cap add android
 
       - name: Sync web assets
         run: npx cap copy android
