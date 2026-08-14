@@ -154,9 +154,27 @@ body{
     background:rgba(0,0,0,0.75);
     align-items:center;justify-content:center;
     z-index:999;
+    padding:20px;
 }
 .gameover-content{
-    background:#1e293b;padding:30px;border-radius:12px;text-align:center;
+    background:#1e293b;
+    padding:30px 24px;
+    border-radius:12px;
+    text-align:center;
+    width:100%;
+    max-width:340px;
+}
+.gameover-content h2{margin-bottom:12px;}
+.gameover-content p{margin-bottom:20px;font-size:16px;color:#cbd5e1;}
+.gameover-btns{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+.gameover-btns .btn{
+    width:100%;
+    padding:12px;
+    font-size:16px;
 }
 
 .mobile-ctrl{
@@ -273,7 +291,7 @@ body{
     <div class="gameover-content">
         <h2>游戏结束</h2>
         <p id="finalInfo"></p>
-        <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;">
+        <div class="gameover-btns">
             <button class="btn btn-green" id="restartBtn">再来一局</button>
             <button class="btn btn-gray" id="backHomeBtn">返回首页</button>
         </div>
