@@ -55,6 +55,20 @@ jobs:
       - name: Init Capacitor
         run: npx cap init "Snake Game" "com.snakegame.app" --web-dir "www"
 
+      - name: Configure remote URL
+        run: |
+          cat > capacitor.config.json << 'EOF'
+          {
+            "appId": "com.snakegame.app",
+            "appName": "Snake Game",
+            "webDir": "www",
+            "server": {
+              "url": "https://weixi-hash.github.io/snakegameee/",
+              "cleartext": false
+            }
+          }
+          EOF
+
       - name: Add Android platform
         run: npx cap add android
 
