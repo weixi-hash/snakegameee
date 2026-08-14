@@ -32,92 +32,41 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          api-level: 34
-          target-sdk: 34
-          build-tools: 34.0.0
-          ndk: 26.1.10909125
+          cmdline-tools-version: '11076708'
+          accept-android-sdk-licenses: true
+          log-accepted-android-sdk-licenses: false
+          packages: >
+            platforms;android-34
+            build-tools;34.0.0
 
-      - name: Create keystore
+      - name: Install Capacitor
+        run: npm install -g @capacitor/cli@6.0.0
+
+      - name: Prepare web assets
         run: |
-          keytool -genkey -v \
-            -keystore $HOME/release.keystore \
-            -storepass ${{ secrets.KEYSTORE_PASSWORD || 'android' }} \
-            -alias snakegame \
-            -keypass ${{ secrets.KEYSTORE_PASSWORD || 'android' }} \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -dname "CN=SnakeGame, OU=Games, O=SnakeGame, L=City, ST=State, C=CN"
-
-      - name: Install dependencies
-        run: npm install -g @capacitor/cli
+          mkdir -p www
+          cp index.html www/
+          cp manifest.json www/
+          cp sw.js www/
 
       - name: Init Capacitor
-        run: |
-          npx cap init "贪吃蛇大作战" "com.snakegame.app" --web-dir "."
+        run: npx cap init "Snake Game" "com.snakegame.app" --web-dir "www"
 
       - name: Add Android platform
-        run: |
-          npx cap add android
+        run: npx cap add android@6.0.0
 
       - name: Sync web assets
         run: npx cap copy android
-
-      - name: Configure build.gradle
-        run: |
-          cat > android/app/build.gradle << 'EOF'
-          apply plugin: 'com.android.application'
-
-          android {
-              namespace 'com.snakegame.app'
-              compileSdkVersion 34
-
-              defaultConfig {
-                  applicationId "com.snakegame.app"
-                  minSdkVersion 24
-                  targetSdkVersion 34
-                  versionCode 1
-                  versionName "0.1.0"
-              }
-
-              signingConfigs {
-                  release {
-                      storeFile file("$HOME/release.keystore")
-                      storePassword "${{ secrets.KEYSTORE_PASSWORD || 'android' }}"
-                      keyAlias "snakegame"
-                      keyPassword "${{ secrets.KEYSTORE_PASSWORD || 'android' }}"
-                  }
-              }
-
-              buildTypes {
-                  release {
-                      signingConfig signingConfigs.release
-                      minifyEnabled false
-                  }
-              }
-
-              compileOptions {
-                  sourceCompatibility JavaVersion.VERSION_17
-                  targetCompatibility JavaVersion.VERSION_17
-              }
-          }
-
-          dependencies {
-              implementation 'androidx.appcompat:appcompat:1.6.1'
-              implementation 'androidx.webkit:webkit:1.10.0'
-              implementation 'androidx.core:core-splashscreen:1.0.1'
-          }
-          EOF
 
       - name: Build APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleRelease
+          ./gradlew assembleDebug
           cd ..
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: snake-game-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
