@@ -1,0 +1,25 @@
+{
+  "name": "贪吃蛇大作战",
+  "short_name": "贪吃蛇",
+  "description": "经典贪吃蛇游戏增强版 - AI对战",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='15' fill='%230f172a'/><circle cx='50' cy='50' r='25' fill='none' stroke='%2322c55e' stroke-width='8'/><circle cx='65' cy='35' r='4' fill='%2322c55e'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='15' fill='%230f172a'/><circle cx='50' cy='50' r='25' fill='none' stroke='%2322c55e' stroke-width='8'/><circle cx='65' cy='35' r='4' fill='%2322c55e'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
